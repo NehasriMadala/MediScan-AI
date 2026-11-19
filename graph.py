@@ -28,7 +28,7 @@ class ReportState(TypedDict):
 
 def retrieve_context(state: ReportState) -> ReportState:
     vs = get_vectorstore()
-    tests = [item["test"] for item in state["lab_data"]]
+    tests = [item.get("test_name") or item.get("test") or "laboratory parameter" for item in state["lab_data"]]
     query = ", ".join(tests)
     docs = vs.similarity_search(query, k=4)
     context = "\n".join(d.page_content for d in docs)

@@ -3,5 +3,15 @@ venv/
 __pycache__/
 *.pyc
 chroma_db/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+data/
+uploads/
+tmp/
 temp_report.pdf
 *.pdf
+*.sqlite3
+*.db

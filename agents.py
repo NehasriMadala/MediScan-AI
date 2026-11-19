@@ -16,12 +16,12 @@ DEFAULT_DISCLAIMER = (
     "Always discuss your lab results with a qualified healthcare provider."
 )
 
-DEFAULT_GROQ_MODEL = "llama3-70b-8192"
+DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
 
 
 def get_groq_api_key() -> str:
     return (
-        os.getenv("GROQ_API_KEY_MEDICAL") or os.getenv("GROQ_API_KEY") or ""
+        os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API_KEY_MEDICAL") or ""
     ).strip()
 
 
@@ -192,6 +192,33 @@ Medical context: {context}
 Generate 3-5 specific, intelligent questions the patient should ask their doctor.
 Return JSON: [{{"question": "..."}}]
 Return ONLY valid JSON, no extra text."""
+    return invoke_llm(prompt)
+
+
+def nutrition_guidance_agent(lab_data: list[dict], context: str) -> str:
+    prompt = f"""You are a medical nutrition education reviewer.
+Validated laboratory data: {lab_data}
+Trusted medical context: {context}
+
+Provide general food and lifestyle education linked only to the actual findings.
+Rules:
+- Do not prescribe supplements or dosages.
+- Do not claim food can cure a deficiency or disease.
+- Include kidney, diabetes, pregnancy and allergy cautions when relevant.
+- If a value is uncertain, do not make patient-specific nutrition claims.
+Return 3-8 concise plain-English bullet ideas."""
+    return invoke_llm(prompt)
+
+
+def doctor_question_agent(lab_data: list[dict], comparison_context: str, rag_context: str) -> str:
+    prompt = f"""Generate a patient appointment question list.
+Validated laboratory data: {lab_data}
+Comparison context: {comparison_context}
+Medical context: {rag_context}
+
+Use only actual findings and uncertainty fields. Produce 5-10 specific questions.
+Do not diagnose or prescribe. Never repeat generic questions when no matching finding exists.
+Return only a JSON list of objects with a "question" field."""
     return invoke_llm(prompt)
 
 
